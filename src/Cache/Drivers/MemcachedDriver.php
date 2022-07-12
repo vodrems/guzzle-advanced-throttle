@@ -5,11 +5,20 @@ namespace hamburgscleanest\GuzzleAdvancedThrottle\Cache\Drivers;
 use hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\MemcachedServersNotSetException;
 use Illuminate\Cache\MemcachedConnector;
 
+/**
+ * Class MemcachedDriver
+ * @package hamburgscleanest\GuzzleAdvancedThrottle\Cache\Drivers
+ */
 class MemcachedDriver extends LaravelDriver
 {
-    protected function _setContainer(): void
+
+    /**
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\MemcachedServersNotSetException
+     */
+    protected function _setContainer() : void
     {
-        if (!isset($this->_options['servers'])) {
+        if (!isset($this->_options['servers']))
+        {
             throw new MemcachedServersNotSetException();
         }
 

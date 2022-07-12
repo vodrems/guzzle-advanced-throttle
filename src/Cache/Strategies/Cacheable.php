@@ -9,34 +9,59 @@ use hamburgscleanest\GuzzleAdvancedThrottle\Cache\Interfaces\StorageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-abstract class Cacheable implements CacheStrategy
+/**
+ * Class Cacheable
+ * @package hamburgscleanest\GuzzleAdvancedThrottle\Cache\Strategies
+ */
+class Cacheable implements CacheStrategy
 {
-    private StorageInterface $_storage;
 
+    /** @var StorageInterface */
+    private $_storage;
+
+    /**
+     * Cachable constructor.
+     * @param null|StorageInterface $storage
+     */
     public function __construct(StorageInterface $storage = null)
     {
         $this->_storage = $storage;
     }
 
-    public function request(RequestInterface $request, callable $handler): PromiseInterface
+    /**
+     * @param RequestInterface $request
+     * @param callable $handler
+     * @return PromiseInterface
+     */
+    public function request(RequestInterface $request, callable $handler) : PromiseInterface
     {
-        return $handler()->then(function(ResponseInterface $response) use ($request) {
+        return $handler()->then(function(ResponseInterface $response) use ($request)
+        {
             $this->_saveResponse($request, $response);
 
             return $response;
         });
     }
 
-    protected function _saveResponse(RequestInterface $request, ResponseInterface $response): void
+    /**
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
+     */
+    protected function _saveResponse(RequestInterface $request, ResponseInterface $response) : void
     {
-        if (ResponseHelper::hasErrorStatusCode($response)) {
+        if (ResponseHelper::hasErrorStatusCode($response))
+        {
             return;
         }
 
         $this->_storage->saveResponse($request, $response);
     }
 
-    protected function _getResponse(RequestInterface $request): ?ResponseInterface
+    /**
+     * @param RequestInterface $request
+     * @return null|ResponseInterface
+     */
+    protected function _getResponse(RequestInterface $request) : ?ResponseInterface
     {
         return $this->_storage->getResponse($request);
     }

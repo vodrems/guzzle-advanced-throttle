@@ -17,11 +17,15 @@ use hamburgscleanest\GuzzleAdvancedThrottle\RequestLimitRuleset;
 use hamburgscleanest\GuzzleAdvancedThrottle\TimeKeeper;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class RequestLimitRulesetTest
+ * @package hamburgscleanest\GuzzleAdvancedThrottle\Tests
+ */
 class RequestLimitRulesetTest extends TestCase
 {
 
     /** @test */
-    public function can_be_created_statically(): void
+    public function can_be_created_statically() : void
     {
         $requestLimitRuleset = RequestLimitRuleset::create([]);
 
@@ -29,19 +33,22 @@ class RequestLimitRulesetTest extends TestCase
     }
 
     /** @test */
-    public function throws_unknown_cache_strategy_exception(): void
+    public function throws_unknown_cache_strategy_exception() : void
     {
         $this->expectException(UnknownCacheStrategyException::class);
         RequestLimitRuleset::create([], TimeKeeper::class);
     }
 
     /** @test */
-    public function verify_exception_message_for_unknown_cache_strategy_exception(): void
+    public function verify_exception_message_for_unknown_cache_strategy_exception() : void
     {
-        try {
+        try
+        {
             RequestLimitRuleset::create([], TimeKeeper::class);
             $this->fail("Should have thrown " . UnknownCacheStrategyException::class);
-        } catch (UnknownCacheStrategyException $e) {
+        }
+        catch (UnknownCacheStrategyException $e)
+        {
             // PHPUnit doesn't have a good way to make sure an exception message contains parts of strings,
             // and I'm not creating a RegExp for this
             $msg = $e->getMessage();
@@ -53,16 +60,14 @@ class RequestLimitRulesetTest extends TestCase
     }
 
     /** @test */
-    public function no_exception_on_custom_cache_strategy(): void
+    public function no_exception_on_custom_cache_strategy() : void
     {
-        $this->assertInstanceOf(
-            RequestLimitRuleset::class,
-            RequestLimitRuleset::create([], DummyCacheStrategy::class)
-        );
+        $this->assertInstanceOf(RequestLimitRuleset::class,
+            RequestLimitRuleset::create([], DummyCacheStrategy::class));
     }
 
     /** @test */
-    public function throws_unknown_storage_adapter_exception_on_invalid_adapter(): void
+    public function throws_unknown_storage_adapter_exception_on_invalid_adapter() : void
     {
         $this->expectException(UnknownStorageAdapterException::class);
 
@@ -70,28 +75,29 @@ class RequestLimitRulesetTest extends TestCase
     }
 
     /** @test */
-    public function no_exception_on_valid_adapter(): void
+    public function no_exception_on_valid_adapter() : void
     {
-        $this->assertInstanceOf(
-            RequestLimitRuleset::class,
-            RequestLimitRuleset::create([], 'no-cache', ArrayAdapter::class)
-        );
+        $this->assertInstanceOf(RequestLimitRuleset::class,
+            RequestLimitRuleset::create([], 'no-cache', ArrayAdapter::class));
     }
 
     /** @test */
-    public function no_unknown_storage_adapter_exception_on_old_laravel_adapter_usage(): void
+    public function no_unknown_storage_adapter_exception_on_old_laravel_adapter_usage() : void
     {
         $this->expectException(LaravelCacheConfigNotSetException::class);
         RequestLimitRuleset::create([], 'no-cache', 'laravel');
     }
 
     /** @test */
-    public function throws_unknown_storage_adapter_exception_on_unknown_adapter_usage(): void
+    public function throws_unknown_storage_adapter_exception_on_unknown_adapter_usage() : void
     {
-        try {
+        try
+        {
             RequestLimitRuleset::create([], 'no-cache', TimeKeeper::class);
             $this->fail('Should have thrown an exception');
-        } catch (UnknownStorageAdapterException $e) {
+        }
+        catch (UnknownStorageAdapterException $e)
+        {
             // PHPUnit doesn't have a good way to make sure an exception message contains parts of strings,
             // and I'm not creating a RegExp for this
             $msg = $e->getMessage();
@@ -101,16 +107,16 @@ class RequestLimitRulesetTest extends TestCase
     }
 
     /** @test */
-    public function no_unknown_storage_adapter_exception_on_custom_adapter_usage(): void
+    public function no_unknown_storage_adapter_exception_on_custom_adapter_usage() : void
     {
-        $this->assertInstanceOf(
-            RequestLimitRuleset::class,
-            RequestLimitRuleset::create([], 'no-cache', DummyStorageAdapter::class)
-        );
+        $this->assertInstanceOf(RequestLimitRuleset::class,
+            RequestLimitRuleset::create([], 'no-cache', DummyStorageAdapter::class));
     }
 
-    /** @test */
-    public function ruleset_contains_the_correct_request_limit_group(): void
+    /** @test
+     * @throws \Exception
+     */
+    public function ruleset_contains_the_correct_request_limit_group() : void
     {
         $host = 'http://www.test.com';
         $interval = 33;
@@ -130,17 +136,20 @@ class RequestLimitRulesetTest extends TestCase
         static::assertEquals($interval, $requestLimitGroup->getRetryAfter());
     }
 
-    /** @test */
-    public function host_for_rules_has_to_be_defined(): void
+    /** @test
+     * @throws \Exception
+     */
+    public function host_for_rules_has_to_be_defined() : void
     {
-        $this->expectException(HostNotDefinedException::class);
-
-        new RequestLimitRuleset([
+        $ruleset = new RequestLimitRuleset([
             [
                 [
                     'max_requests' => 1
                 ]
             ]
         ]);
+
+        $this->expectException(HostNotDefinedException::class);
+        $ruleset->getRequestLimitGroup();
     }
 }

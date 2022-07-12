@@ -7,62 +7,35 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## Next
 
 ### Added
-
 - Nothing
 
 ### Deprecated
-
 - Nothing
 
 ### Fixed
-
 - Nothing
 
 ### Removed
-
 - Nothing
 
 ### Security
-
 - Nothing
-
-----------
-
-## 5.0.1
-
-### Fixed
-
-- fix wrong method call in `LaravelAdapter`
-
-----------
-
-## 5.0.0
-
-### Added
-
-- PHP 8 support
-
-### Removed
-
-- PHP 7 support
 
 ----------
 
 ## 4.1.1
 
 ### Security
-
 This fixes a security vulnerabilities in `symfony/http-foundation` and `symfony/http-kernel`:  
 
-- <https://github.com/FriendsOfPHP/security-advisories/blob/master/symfony/http-foundation/CVE-2019-18888.yaml>
-- <https://github.com/FriendsOfPHP/security-advisories/blob/master/symfony/http-kernel/CVE-2019-18887.yaml>
+- https://github.com/FriendsOfPHP/security-advisories/blob/master/symfony/http-foundation/CVE-2019-18888.yaml
+- https://github.com/FriendsOfPHP/security-advisories/blob/master/symfony/http-kernel/CVE-2019-18887.yaml
 
 ----------
 
 ## 4.1.0
 
 ### Compatibility
-
 Ensure compatibility to `Laravel 6.0`.
 
 ----------
@@ -70,7 +43,6 @@ Ensure compatibility to `Laravel 6.0`.
 ## 4.0.3
 
 ### Security
-
 Updated external dependencies.
 
 ----------
@@ -78,10 +50,9 @@ Updated external dependencies.
 ## 4.0.2
 
 ### Security
-
 This fixes a security vulnerability in `symfony/http-foundation`:
 
-<https://github.com/FriendsOfPHP/security-advisories/blob/master/symfony/http-foundation/CVE-2019-10913.yaml>
+https://github.com/FriendsOfPHP/security-advisories/blob/master/symfony/http-foundation/CVE-2019-10913.yaml
 
 ----------
 
@@ -94,12 +65,10 @@ Simplified and hardened error status code detection.
 ## 4.0.0
 
 ### Added
-
 - Compatibility with Laravel / Illuminate 5.8
 - Upgraded PHPUnit to version 8
 
 ### Removed
-
 - Dropped support for PHP 7.1
 
 ----------
@@ -107,9 +76,7 @@ Simplified and hardened error status code detection.
 ## 3.1.0
 
 ### Fixed
-
-#### Changed the cached representation of the response
-
+#### Changed the cached representation of the response.
 This should solve the issue where one had to use `(string) $response->getBody()` instead of `$response->getBody()->getContents()`.
 
 ### Laravel storage adapters
@@ -123,7 +90,6 @@ Check out the [docs](https://github.com/hamburgscleanest/guzzle-advanced-throttl
 ## 3.0.1
 
 ### Fixed
-
 - Fixed a problem when generating the cache key for a request without parameters
 
 ----------
@@ -137,7 +103,6 @@ This release adds compatibility with Laravel 5.7 (Illuminate).
 ## 2.0.7
 
 ### Improvement
-
 The order of request parameters is now irrelevant for the cache.
 If the values of the parameters are the same, the requests will be treated as the same, too.
 
@@ -149,7 +114,6 @@ the cache will know that it yields the same response as `/test?b=2&a=1`.
 ## 2.0.6
 
 ### Fixed
-
 - The request count was not properly reset because `RateLimiter::getCurrentRequestCount()` wasn't used internally.
 
 Thanks to @huisman303 for finding this!
@@ -159,7 +123,6 @@ Thanks to @huisman303 for finding this!
 ## 2.0.5
 
 ### Added
-
 - You can now provide a custom caching strategy instead of being limited to the default ones.
   
   Your custom caching strategy must implement `CacheStrategy`.
@@ -182,38 +145,35 @@ Thanks to @huisman303 for finding this!
 ----------
 
 ## 2.0.4
-
-- The middleware can now be called as a function instead of calling the `handle` method.
+- The middleware can now be called as a function instead of calling the `handle` method. 
 
 ``` php
  $throttle = new ThrottleMiddleware($rules);
  
  $stack->push($throttle());
 ```
-
-----------
+ 
+---------- 
 
 ## 2.0.3
 
 ### Fixed
-
-- Fixed issue in Redis driver
+- Fixed issue in Redis driver 
 
 ----------
 
 ## 2.0.2
 
 ### Fixed
-
 - Fixed problems with Laravel cache drivers
 
 ----------
 
+
 ## 2.0.1
 
 ### Fixed
-
-There was a problem in the composer.json that for example broke the compatibility to Drupal 8. This is fixed in this release.
+There was a problem in the composer.json that for example broke the compatibility to Drupal 8. This is fixed in this release. 
 
 Thanks to @berenddeboer !
 
@@ -222,7 +182,6 @@ Thanks to @berenddeboer !
 ## 2.0.0
 
 ### Added
-
 - Host wildcards: [WILDCARDS](README.md#wildcards)
 - More flexible configuration: [USAGE](README.md#usage) - **BREAKING**
 
@@ -233,7 +192,6 @@ Thanks to @berenddeboer !
 ### Added
 
 - Support for Laravel 5.5
-
 ----------
 
 ## 1.0.6
@@ -255,15 +213,13 @@ Thanks to @berenddeboer !
 ## 1.0.4
 
 ### Added
-
-- Possibility to define the TTL for the cache in the config
+- Possibility to define the TTL for the cache in the config 
 
 ----------
 
 ## 1.0.3
 
 ### Added
-
 - Simplified the config format of the laravel cache adapter
 
 ----------
@@ -271,15 +227,13 @@ Thanks to @berenddeboer !
 ## 1.0.2
 
 ### Added
-
 - Possibility to configure the laravel cache adapter
 
 ----------
 
-## 1.0.1
+## 1.0.1 
 
 ### Fixed
-
 - Host not recognized
 
 ----------

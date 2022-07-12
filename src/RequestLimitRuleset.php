@@ -17,8 +17,13 @@ use hamburgscleanest\GuzzleAdvancedThrottle\Helpers\InterfaceHelper;
 use Illuminate\Config\Repository;
 use Psr\Http\Message\RequestInterface;
 
+/**
+ * Class RequestLimitRuleset
+ * @package hamburgscleanest\GuzzleAdvancedThrottle
+ */
 class RequestLimitRuleset
 {
+
     /** @var array */
     private const STORAGE_MAP = [
         'array'   => ArrayAdapter::class,
@@ -32,63 +37,110 @@ class RequestLimitRuleset
         'force-cache' => ForceCache::class
     ];
 
-    private StorageInterface $_storage;
-    private CacheStrategy $_cacheStrategy;
-    private RequestLimitGroup $_requestLimitGroup;
+    /** @var array */
+    private $_rules;
 
+    /** @var StorageInterface */
+    private $_storage;
+
+    /** @var CacheStrategy */
+    private $_cacheStrategy;
+
+    /** @var Repository */
+    private $_config;
+
+    /**
+     * RequestLimitRuleset constructor.
+     * @param array $rules
+     * @param string $cacheStrategy
+     * @param string|null $storageAdapter
+     * @param Repository|null $config
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\UnknownCacheStrategyException
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\UnknownStorageAdapterException
+     */
     public function __construct(array $rules, string $cacheStrategy = 'no-cache', string $storageAdapter = 'array', Repository $config = null)
     {
-        $this->_setStorageAdapter($storageAdapter, $config);
+        $this->_rules = $rules;
+        $this->_config = $config;
+        $this->_setStorageAdapter($storageAdapter);
         $this->_setCacheStrategy($cacheStrategy);
-        $this->_setRequestLimitGroup($rules);
     }
 
-    private function _setStorageAdapter(string $adapterName, ?Repository $config): void
+    /**
+     * Sets internal storage adapter for this rule set.
+     * @param string $adapterName
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\UnknownStorageAdapterException
+     */
+    private function _setStorageAdapter(string $adapterName) : void
     {
         $adapterClassName = self::STORAGE_MAP[$adapterName] ?? $adapterName;
 
-        if (!InterfaceHelper::implementsInterface($adapterClassName, StorageInterface::class)) {
+        if (!InterfaceHelper::implementsInterface($adapterClassName, StorageInterface::class))
+        {
             throw new UnknownStorageAdapterException($adapterClassName, \array_values(self::STORAGE_MAP));
         }
 
-        $this->_storage = new $adapterClassName($config);
+        $this->_storage = new $adapterClassName($this->_config);
     }
 
-    private function _setCacheStrategy(string $cacheStrategy): void
+    /**
+     * Sets the caching strategy for this rule set.
+     * @param string $cacheStrategy
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\UnknownCacheStrategyException
+     */
+    private function _setCacheStrategy(string $cacheStrategy) : void
     {
         $cacheStrategyClassName = self::CACHE_STRATEGIES[$cacheStrategy] ?? $cacheStrategy;
 
-        if (!InterfaceHelper::implementsInterface($cacheStrategyClassName, CacheStrategy::class)) {
+        if (!InterfaceHelper::implementsInterface($cacheStrategyClassName, CacheStrategy::class))
+        {
             throw new UnknownCacheStrategyException($cacheStrategyClassName, \array_values(self::CACHE_STRATEGIES));
         }
 
         $this->_cacheStrategy = new $cacheStrategyClassName($this->_storage);
     }
 
+    /**
+     * @param array $rules
+     * @param string $cacheStrategy
+     * @param string $storageAdapter
+     * @return static
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\UnknownStorageAdapterException
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\UnknownCacheStrategyException
+     */
     public static function create(array $rules, string $cacheStrategy = 'no-cache', string $storageAdapter = 'array')
     {
         return new static($rules, $cacheStrategy, $storageAdapter);
     }
 
-    public function cache(RequestInterface $request, callable $handler): PromiseInterface
+    /**
+     * @param RequestInterface $request
+     * @param callable $handler
+     * @return PromiseInterface
+     */
+    public function cache(RequestInterface $request, callable $handler) : PromiseInterface
     {
         return $this->_cacheStrategy->request($request, $handler);
     }
 
-    private function _setRequestLimitGroup(array $ruleGroup): void
+    /**
+     * @return RequestLimitGroup
+     * @throws \Exception
+     * @throws HostNotDefinedException
+     */
+    public function getRequestLimitGroup() : RequestLimitGroup
     {
-        $this->_requestLimitGroup = new RequestLimitGroup();
-        foreach ($ruleGroup as $host => $rules) {
-            if (!\is_string($host)) {
+        $requestLimitGroup = new RequestLimitGroup();
+        foreach ($this->_rules as $host => $rules)
+        {
+            if (!\is_string($host))
+            {
                 throw new HostNotDefinedException();
             }
 
-            $this->_requestLimitGroup->addRules($host, $rules, $this->_storage);
+            $requestLimitGroup->addRules($host, $rules, $this->_storage);
         }
-    }
 
-    public function getRequestLimitGroup(): RequestLimitGroup
-    {
-        return $this->_requestLimitGroup;
+        return $requestLimitGroup;
     }
 }

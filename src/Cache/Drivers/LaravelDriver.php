@@ -5,16 +5,29 @@ namespace hamburgscleanest\GuzzleAdvancedThrottle\Cache\Drivers;
 use Illuminate\Container\Container;
 
 
+/**
+ * Class LaravelDriver
+ * @package hamburgscleanest\GuzzleAdvancedThrottle\Cache\Drivers
+ */
 abstract class LaravelDriver
 {
+
     /** @var string */
     private const DEFAULT_CACHE_PREFIX = 'throttle_cache';
+    /** @var Container */
+    protected $_container;
+    /** @var string */
+    protected $_driver;
+    /** @var array */
+    protected $_options;
+    /** @var string */
+    private $_driverStoreKey;
 
-    protected Container $_container;
-    protected string $_driver;
-    protected array $_options;
-    private string $_driverStoreKey;
-
+    /**
+     * LaravelDriver constructor.
+     * @param string $driver
+     * @param array $options
+     */
     public function __construct(string $driver, array $options = [])
     {
         $this->_container = new Container();
@@ -23,7 +36,10 @@ abstract class LaravelDriver
         $this->_options = $options;
     }
 
-    public function getContainer(): Container
+    /**
+     * @return Container
+     */
+    public function getContainer() : Container
     {
         $this->_setConfig();
         $this->_setContainer();
@@ -31,9 +47,9 @@ abstract class LaravelDriver
         return $this->_container;
     }
 
-    abstract protected function _setContainer(): void;
+    abstract protected function _setContainer() : void;
 
-    private function _setConfig(): void
+    private function _setConfig() : void
     {
         $this->_container['config'] = [
             'cache.default'        => $this->_driver,
@@ -42,7 +58,11 @@ abstract class LaravelDriver
         ];
     }
 
-    protected function _setStoreValue(string $key, $value): void
+    /**
+     * @param string $key
+     * @param mixed $value
+     */
+    protected function _setStoreValue(string $key, $value) : void
     {
         $this->_container->offsetSet('config.' . $this->_driverStoreKey . '.' . $key, $value);
     }

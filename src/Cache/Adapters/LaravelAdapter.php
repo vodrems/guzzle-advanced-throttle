@@ -2,23 +2,36 @@
 
 namespace hamburgscleanest\GuzzleAdvancedThrottle\Cache\Adapters;
 
+use DateTime;
 use GuzzleHttp\Psr7\Response;
 use hamburgscleanest\GuzzleAdvancedThrottle\Cache\CachedResponse;
 use hamburgscleanest\GuzzleAdvancedThrottle\Cache\Helpers\CacheConfigHelper;
 use hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\LaravelCacheConfigNotSetException;
 use hamburgscleanest\GuzzleAdvancedThrottle\RequestInfo;
-use hamburgscleanest\GuzzleAdvancedThrottle\TimeKeeper;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * Class LaravelAdapter
+ * @package hamburgscleanest\GuzzleAdvancedThrottle\Cache\Adapters
+ */
 class LaravelAdapter extends BaseAdapter
 {
-    private CacheManager $_cacheManager;
 
+    /** @var CacheManager */
+    private $_cacheManager;
+
+    /**
+     * LaravelAdapter constructor.
+     * @param Repository|null $config
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\LaravelCacheDriverNotSetException
+     * @throws \hamburgscleanest\GuzzleAdvancedThrottle\Exceptions\LaravelCacheConfigNotSetException
+     */
     public function __construct(?Repository $config = null)
     {
-        if ($config === null || ($cacheConfig = $config->get('cache')) === null) {
+        if ($config === null || ($cacheConfig = $config->get('cache')) === null)
+        {
             throw new LaravelCacheConfigNotSetException();
         }
 
@@ -28,39 +41,50 @@ class LaravelAdapter extends BaseAdapter
         $this->_allowEmptyValues = $cacheRepository->get('allow_empty', $this->_allowEmptyValues);
     }
 
-    public function save(string $host, string $key, int $requestCount, TimeKeeper $timeKeeper): void
+    /**
+     * @param string $host
+     * @param string $key
+     * @param int $requestCount
+     * @param DateTime $expiresAt
+     * @param int $remainingSeconds
+     */
+    public function save(string $host, string $key, int $requestCount, DateTime $expiresAt, int $remainingSeconds) : void
     {
-        $expiration = $timeKeeper->getExpiration();
-        if ($expiration === null) {
-            $this->_cacheManager->forget($this->_buildKey($host, $key));
-
-            return;
-        }
-
-        $remainingSeconds = $timeKeeper->getRemainingSeconds();
-
         $this->_cacheManager->put(
             $this->_buildKey($host, $key),
-            RequestInfo::create(
-                $requestCount,
-                $expiration->getTimestamp(),
-                $remainingSeconds
-            ),
+            RequestInfo::create($requestCount, $expiresAt->getTimestamp(), $remainingSeconds),
             $remainingSeconds
         );
     }
 
-    private function _buildKey(string $host, string $key): string
+    /**
+     * @param string $host
+     * @param string $key
+     * @return string
+     */
+    private function _buildKey(string $host, string $key) : string
     {
         return $host . '.' . $key;
     }
 
-    public function get(string $host, string $key): ?RequestInfo
+    /**
+     * @param string $host
+     * @param string $key
+     * @return RequestInfo|null
+     */
+    public function get(string $host, string $key) : ?RequestInfo
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->_cacheManager->get($this->_buildKey($host, $key));
     }
 
-    protected function _saveResponse(ResponseInterface $response, string $host, string $path, string $key): void
+    /**
+     * @param ResponseInterface $response
+     * @param string $host
+     * @param string $path
+     * @param string $key
+     */
+    protected function _saveResponse(ResponseInterface $response, string $host, string $path, string $key) : void
     {
         $this->_cacheManager->put(
             $this->_buildResponseKey($host, $path, $key),
@@ -69,12 +93,24 @@ class LaravelAdapter extends BaseAdapter
         );
     }
 
-    private function _buildResponseKey(string $host, string $path, string $key): string
+    /**
+     * @param string $host
+     * @param string $path
+     * @param string $key
+     * @return string
+     */
+    private function _buildResponseKey(string $host, string $path, string $key) : string
     {
         return self::STORAGE_KEY . '.' . $host . '.' . $path . '.' . $key;
     }
 
-    protected function _getResponse(string $host, string $path, string $key): ?Response
+    /**
+     * @param string $host
+     * @param string $path
+     * @param string $key
+     * @return null|Response
+     */
+    protected function _getResponse(string $host, string $path, string $key) : ?Response
     {
         /** @var CachedResponse|null $cachedResponse */
         $cachedResponse = $this->_cacheManager->get($this->_buildResponseKey($host, $path, $key));
